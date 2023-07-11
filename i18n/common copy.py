@@ -22,7 +22,6 @@ import json
 import os
 from datetime import datetime
 
-
 class InputError(Exception):
     """Exception raised for errors in the input.
 
@@ -33,36 +32,36 @@ class InputError(Exception):
     """
 
     def __init__(self, location, msg):
-        Exception.__init__(self, "{0}: {1}".format(location, msg))
+        Exception.__init__(self, '{0}: {1}'.format(location, msg))
         self.location = location
         self.msg = msg
 
 
 def read_json_file(filename):
-    """Read a JSON file as UTF-8 into a dictionary, discarding @metadata.
+  """Read a JSON file as UTF-8 into a dictionary, discarding @metadata.
 
-    Args:
-      filename: The filename, which must end ".json".
+  Args:
+    filename: The filename, which must end ".json".
 
-    Returns:
-      The dictionary.
+  Returns:
+    The dictionary.
 
-    Raises:
-      InputError: The filename did not end with ".json" or an error occurred
-          while opening or reading the file.
-    """
-    if not filename.endswith(".json"):
-        raise InputError(filename, 'filenames must end with ".json"')
-    try:
-        # Read in file.
-        with codecs.open(filename, "r", "utf-8") as infile:
-            defs = json.load(infile)
-        if "@metadata" in defs:
-            del defs["@metadata"]
-        return defs
-    except ValueError as e:
-        print("Error reading " + filename)
-        raise InputError(filename, str(e))
+  Raises:
+    InputError: The filename did not end with ".json" or an error occurred
+        while opening or reading the file.
+  """
+  if not filename.endswith('.json'):
+    raise InputError(filename, 'filenames must end with ".json"')
+  try:
+    # Read in file.
+    with codecs.open(filename, 'r', 'utf-8') as infile:
+      defs = json.load(infile)
+    if '@metadata' in defs:
+      del defs['@metadata']
+    return defs
+  except ValueError, e:
+    print('Error reading ' + filename)
+    raise InputError(filename, str(e))
 
 
 def _create_qqq_file(output_dir):
@@ -84,10 +83,10 @@ def _create_qqq_file(output_dir):
     Raises:
         IOError: An error occurred while opening or writing the file.
     """
-    qqq_file_name = os.path.join(os.curdir, output_dir, "qqq.json")
-    qqq_file = codecs.open(qqq_file_name, "w", "utf-8")
-    print("Created file: " + qqq_file_name)
-    qqq_file.write("{\n")
+    qqq_file_name = os.path.join(os.curdir, output_dir, 'qqq.json')
+    qqq_file = codecs.open(qqq_file_name, 'w', 'utf-8')
+    print 'Created file: ' + qqq_file_name
+    qqq_file.write('{\n')
     return qqq_file
 
 
@@ -102,7 +101,7 @@ def _close_qqq_file(qqq_file):
     Raises:
         IOError: An error occurred while writing to or closing the file.
     """
-    qqq_file.write("\n}\n")
+    qqq_file.write('\n}\n')
     qqq_file.close()
 
 
@@ -125,22 +124,18 @@ def _create_lang_file(author, lang, output_dir):
     Raises:
         IOError: An error occurred while opening or writing the file.
     """
-    lang_file_name = os.path.join(os.curdir, output_dir, lang + ".json")
-    lang_file = codecs.open(lang_file_name, "w", "utf-8")
-    print("Created file: " + lang_file_name)
+    lang_file_name = os.path.join(os.curdir, output_dir, lang + '.json')
+    lang_file = codecs.open(lang_file_name, 'w', 'utf-8')
+    print 'Created file: ' + lang_file_name
     # string.format doesn't like printing braces, so break up our writes.
     lang_file.write('{\n\t"@metadata": {')
-    lang_file.write(
-        """
+    lang_file.write("""
 \t\t"author": "{0}",
 \t\t"lastupdated": "{1}",
 \t\t"locale": "{2}",
 \t\t"messagedocumentation" : "qqq"
-""".format(
-            author, str(datetime.now()), lang
-        )
-    )
-    lang_file.write("\t},\n")
+""".format(author, str(datetime.now()), lang))
+    lang_file.write('\t},\n')
     return lang_file
 
 
@@ -155,7 +150,7 @@ def _close_lang_file(lang_file):
     Raises:
         IOError: An error occurred while writing to or closing the file.
     """
-    lang_file.write("\n}\n")
+    lang_file.write('\n}\n')
     lang_file.close()
 
 
@@ -168,10 +163,10 @@ def _create_key_file(output_dir):
     Raises:
         IOError: An error occurred while creating the file.
     """
-    key_file_name = os.path.join(os.curdir, output_dir, "keys.json")
-    key_file = open(key_file_name, "w")
-    key_file.write("{\n")
-    print("Created file: " + key_file_name)
+    key_file_name = os.path.join(os.curdir, output_dir, 'keys.json')
+    key_file = open(key_file_name, 'w')
+    key_file.write('{\n')
+    print 'Created file: ' + key_file_name
     return key_file
 
 
@@ -184,7 +179,7 @@ def _close_key_file(key_file):
     Raises:
         IOError: An error occurred while writing to or closing the file.
     """
-    key_file.write("\n}\n")
+    key_file.write('\n}\n')
     key_file.close()
 
 
@@ -215,30 +210,25 @@ def write_files(author, lang, output_dir, units, write_key_file):
     lang_file = _create_lang_file(author, lang, output_dir)
     qqq_file = _create_qqq_file(output_dir)
     if write_key_file:
-        key_file = _create_key_file(output_dir)
+      key_file = _create_key_file(output_dir)
     first_entry = True
     for unit in units:
         if not first_entry:
-            lang_file.write(",\n")
+            lang_file.write(',\n')
             if write_key_file:
-                key_file.write(",\n")
-            qqq_file.write(",\n")
-        lang_file.write(
-            '\t"{0}": "{1}"'.format(unit["meaning"], unit["source"].replace('"', "'"))
-        )
+              key_file.write(',\n')
+            qqq_file.write(',\n')
+        lang_file.write(u'\t"{0}": "{1}"'.format(
+            unit['meaning'],
+            unit['source'].replace('"', "'")))
         if write_key_file:
-            key_file.write('"{0}": "{1}"'.format(unit["meaning"], unit["key"]))
-        qqq_file.write(
-            '\t"{0}": "{1}"'.format(
-                unit["meaning"],
-                unit["description"]
-                .replace('"', "'")
-                .replace("{lb}", "{")
-                .replace("{rb}", "}"),
-            )
-        )
+          key_file.write('"{0}": "{1}"'.format(unit['meaning'], unit['key']))
+        qqq_file.write(u'\t"{0}": "{1}"'.format(
+            unit['meaning'],
+            unit['description'].replace('"', "'").replace(
+                '{lb}', '{').replace('{rb}', '}')))
         first_entry = False
     _close_lang_file(lang_file)
     if write_key_file:
-        _close_key_file(key_file)
+      _close_key_file(key_file)
     _close_qqq_file(qqq_file)

@@ -51,31 +51,31 @@ def _parse_trans_unit(trans_unit):
         if not elts:
             return None
         elif len(elts) == 1:
-            return "".join([child.toxml() for child in elts[0].childNodes])
+            return ''.join([child.toxml() for child in elts[0].childNodes])
         else:
-            raise InputError("", "Unable to extract " + tag_name)
+            raise InputError('', 'Unable to extract ' + tag_name)
 
     result = {}
-    key = trans_unit.getAttribute("id")
+    key = trans_unit.getAttribute('id')
     if not key:
-        raise InputError("", "id attribute not found")
-    result["key"] = key
+        raise InputError('', 'id attribute not found')
+    result['key'] = key
 
     # Get source and target, if present.
     try:
-        result["source"] = get_value("source")
-        result["target"] = get_value("target")
-    except InputError as e:
+        result['source'] = get_value('source')
+        result['target'] = get_value('target')
+    except InputError, e:
         raise InputError(key, e.msg)
 
     # Get notes, using the from value as key and the data as value.
-    notes = trans_unit.getElementsByTagName("note")
+    notes = trans_unit.getElementsByTagName('note')
     for note in notes:
-        from_value = note.getAttribute("from")
+        from_value = note.getAttribute('from')
         if from_value and len(note.childNodes) == 1:
             result[from_value] = note.childNodes[0].data
         else:
-            raise InputError(key, "Unable to extract " + from_value)
+            raise InputError(key, 'Unable to extract ' + from_value)
 
     return result
 
@@ -106,51 +106,48 @@ def _process_file(filename):
     """
     try:
         results = []  # list of dictionaries (return value)
-        names = []  # list of names of encountered keys (local variable)
+        names = []    # list of names of encountered keys (local variable)
         try:
             parsed_xml = minidom.parse(filename)
         except IOError:
             # Don't get caught by below handler
             raise
-        except Exception as e:
+        except Exception, e:
             print
             raise InputError(filename, str(e))
 
         # Make sure needed fields are present and non-empty.
-        for trans_unit in parsed_xml.getElementsByTagName("trans-unit"):
+        for trans_unit in parsed_xml.getElementsByTagName('trans-unit'):
             unit = _parse_trans_unit(trans_unit)
-            for key in ["description", "meaning", "source"]:
+            for key in ['description', 'meaning', 'source']:
                 if not key in unit or not unit[key]:
-                    raise InputError(filename + ":" + unit["key"], key + " not found")
-            if unit["description"].lower() == "ibid":
-                if unit["meaning"] not in names:
-                    # If the term has not already been described, the use of 'ibid'
-                    # is an error.
-                    raise InputError(
-                        filename,
-                        "First encountered definition of: "
-                        + unit["meaning"]
-                        + " has definition: "
-                        + unit["description"]
-                        + ".  This error can occur if the definition was not"
-                        + " provided on the first appearance of the message"
-                        + " or if the source (English-language) messages differ.",
-                    )
-                else:
-                    # If term has already been described, 'ibid' was used correctly,
-                    # and we output nothing.
-                    pass
+                    raise InputError(filename + ':' + unit['key'],
+                                     key + ' not found')
+            if unit['description'].lower() == 'ibid':
+              if unit['meaning'] not in names:
+                # If the term has not already been described, the use of 'ibid'
+                # is an error.
+                raise InputError(
+                    filename,
+                    'First encountered definition of: ' + unit['meaning']
+                    + ' has definition: ' + unit['description']
+                    + '.  This error can occur if the definition was not'
+                    + ' provided on the first appearance of the message'
+                    + ' or if the source (English-language) messages differ.')
+              else:
+                # If term has already been described, 'ibid' was used correctly,
+                # and we output nothing.
+                pass
             else:
-                if unit["meaning"] in names:
-                    raise InputError(
-                        filename, "Second definition of: " + unit["meaning"]
-                    )
-                names.append(unit["meaning"])
-                results.append(unit)
+              if unit['meaning'] in names:
+                raise InputError(filename,
+                                 'Second definition of: ' + unit['meaning'])
+              names.append(unit['meaning'])
+              results.append(unit)
 
         return results
-    except IOError as e:
-        print("Error with file {0}: {1}".format(filename, e.strerror))
+    except IOError, e:
+        print 'Error with file {0}: {1}'.format(filename, e.strerror)
         sys.exit(1)
 
 
@@ -171,19 +168,16 @@ def sort_units(units, templates):
         InputError: If a meaning definition cannot be found in the
             templates.
     """
-
     def key_function(unit):
         match = re.search(
-            '\\smeaning\\s*=\\s*"{0}"\\s'.format(unit["meaning"]), templates
-        )
+            '\\smeaning\\s*=\\s*"{0}"\\s'.format(unit['meaning']),
+            templates)
         if match:
             return match.start()
         else:
-            raise InputError(
-                args.templates,
-                "msg definition for meaning not found: " + unit["meaning"],
-            )
-
+            raise InputError(args.templates,
+                             'msg definition for meaning not found: ' +
+                             unit['meaning'])
     return sorted(units, key=key_function)
 
 
@@ -195,49 +189,44 @@ def main():
         InputError: Input files lacked required fields.
     """
     # Set up argument parser.
-    parser = argparse.ArgumentParser(description="Create translation files.")
+    parser = argparse.ArgumentParser(description='Create translation files.')
     parser.add_argument(
-        "--author",
-        default="Ellen Spertus <ellen.spertus@gmail.com>",
-        help="name and email address of contact for translators",
-    )
-    parser.add_argument("--lang", default="en", help="ISO 639-1 source language code")
-    parser.add_argument(
-        "--output_dir", default="json", help="relative directory for output files"
-    )
-    parser.add_argument("--xlf", help="file containing xlf definitions")
-    parser.add_argument(
-        "--templates",
-        default=["template.soy"],
-        nargs="+",
-        help="relative path to Soy templates, comma or space "
-        "separated (used for ordering messages)",
-    )
+        '--author',
+        default='Ellen Spertus <ellen.spertus@gmail.com>',
+        help='name and email address of contact for translators')
+    parser.add_argument('--lang', default='en',
+                        help='ISO 639-1 source language code')
+    parser.add_argument('--output_dir', default='json',
+                        help='relative directory for output files')
+    parser.add_argument('--xlf', help='file containing xlf definitions')
+    parser.add_argument('--templates', default=['template.soy'], nargs='+',
+                        help='relative path to Soy templates, comma or space '
+                        'separated (used for ordering messages)')
     global args
     args = parser.parse_args()
 
     # Make sure output_dir ends with slash.
-    if not args.output_dir.endswith(os.path.sep):
-        args.output_dir += os.path.sep
+    if (not args.output_dir.endswith(os.path.sep)):
+      args.output_dir += os.path.sep
 
     # Process the input file, and sort the entries.
     units = _process_file(args.xlf)
     files = []
     for arg in args.templates:
-        for filename in arg.split(","):
-            filename = filename.strip()
-            if filename:
-                with open(filename) as myfile:
-                    files.append(" ".join(line.strip() for line in myfile))
-    sorted_units = sort_units(units, " ".join(files))
+      for filename in arg.split(','):
+        filename = filename.strip();
+        if filename:
+          with open(filename) as myfile:
+            files.append(' '.join(line.strip() for line in myfile))
+    sorted_units = sort_units(units, ' '.join(files))
 
     # Write the output files.
     write_files(args.author, args.lang, args.output_dir, sorted_units, True)
 
     # Delete the input .xlf file.
     os.remove(args.xlf)
-    print("Removed " + args.xlf)
+    print('Removed ' + args.xlf)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
