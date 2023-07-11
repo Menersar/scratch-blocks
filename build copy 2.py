@@ -59,12 +59,9 @@ def init_closure_library():
   """Initialize the closure library for closure compiler to use.
   Only work when the OS is windows.
   """
-  print("CLOSURE_ROOT_NPM: " + CLOSURE_ROOT_NPM)
-  print("CLOSURE_LIBRARY_NPM: " + CLOSURE_LIBRARY_NPM)
   if sys.platform != "win32": return
   src = os.path.join(os.getcwd(), CLOSURE_ROOT_NPM, CLOSURE_LIBRARY_NPM)
-  # dst = os.path.join(os.getcwd(), "..", CLOSURE_LIBRARY)
-  dst = os.path.join(os.getcwd(), CLOSURE_ROOT_NPM, CLOSURE_LIBRARY_NPM)
+  dst = os.path.join(os.getcwd(), "..", CLOSURE_LIBRARY)
   # adminPrefixArg = ["runas", "/env", "/noprofile", "/user:" + os.environ.get("USERNAME")]
   args = ["mklink /J ", dst, src]
   try:
@@ -266,8 +263,6 @@ class Gen_compressed(threading.Thread):
       target_filename = 'blockly_compressed_horizontal.js'
       search_paths = self.search_paths_horizontal
     print("Generating " + target_filename)
-    # !!!
-    # ???
     # Define the parameters for the POST request.
     params = [
       ("compilation_level", "SIMPLE" if sys.argv.__len__() > 1 and sys.argv[1] == "production" else "SIMPLE"),
@@ -434,8 +429,6 @@ class Gen_compressed(threading.Thread):
   def report_errors(self, target_filename, filenames, json_data):
     def file_lookup(name):
       if not name.startswith("Input_"):
-        # ???
-        # !!!
         return "???"
       n = int(name[6:]) - 1
       return filenames[n]
