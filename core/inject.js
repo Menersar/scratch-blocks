@@ -67,7 +67,7 @@ Blockly.inject = function(container, opt_options) {
   // Create surfaces for dragging things. These are optimizations
   // so that the broowser does not repaint during the drag.
   var blockDragSurface = new Blockly.BlockDragSurfaceSvg(subContainer);
-  var workspaceDragSurface = new Blockly.WorkspaceDragSurfaceSvg(subContainer);
+  var workspaceDragSurface = null;
 
   var workspace = Blockly.createMainWorkspace_(svg, options, blockDragSurface,
       workspaceDragSurface);
@@ -352,6 +352,11 @@ Blockly.createMainWorkspace_ = function(svg, options, blockDragSurface, workspac
 Blockly.init_ = function(mainWorkspace) {
   var options = mainWorkspace.options;
   var svg = mainWorkspace.getParentSvg();
+
+  // This fixes wheel events in Safari.
+  // This makes no sense, but it really does work.
+  // https://bugs.webkit.org/show_bug.cgi?id=226683#c4
+  svg.parentNode.addEventListener('wheel', function() {});
 
   // Suppress the browser's context menu.
   Blockly.bindEventWithChecks_(svg.parentNode, 'contextmenu', null,

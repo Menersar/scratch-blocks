@@ -243,10 +243,11 @@ Blockly.onKeyDown_ = function(e) {
         workspace.paste(Blockly.clipboardXml_);
         Blockly.Events.setGroup(false);
       }
-    } else if (e.keyCode == 90) {
-      // 'z' for undo 'Z' is for redo.
+    } else if (e.keyCode == 90 || e.keyCode === 89) {
+      // 'z' for undo 'Z' is for redo. 'y' is always redo.
+      e.preventDefault();
       Blockly.hideChaff();
-      Blockly.mainWorkspace.undo(e.shiftKey);
+      Blockly.mainWorkspace.undo(e.shiftKey || e.keyCode === 89);
     }
   }
   // Common code for delete and cut.
@@ -457,11 +458,6 @@ Blockly.defineBlocksWithJsonArray = function(jsonArray) {
             'Block definition #' + i +
             ' in JSON array is missing a type attribute. Skipping.');
       } else {
-        if (Blockly.Blocks[typename]) {
-          console.warn(
-              'Block definition #' + i + ' in JSON array' +
-              ' overwrites prior definition of "' + typename + '".');
-        }
         Blockly.Blocks[typename] = {
           init: Blockly.jsonInitFactory_(elem)
         };

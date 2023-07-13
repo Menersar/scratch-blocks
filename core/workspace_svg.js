@@ -50,6 +50,7 @@ goog.require('Blockly.WorkspaceCommentSvg.render');
 goog.require('Blockly.WorkspaceDragSurfaceSvg');
 goog.require('Blockly.Xml');
 goog.require('Blockly.ZoomControls');
+goog.require('Blockly.IntersectionObserver');
 
 goog.require('goog.array');
 goog.require('goog.dom');
@@ -472,6 +473,8 @@ Blockly.WorkspaceSvg.prototype.createDom = function(opt_backgroundClass) {
     }
   }
 
+  this.intersectionObserver = new Blockly.IntersectionObserver(this);
+
   // Determine if there needs to be a category tree, or a simple list of
   // blocks.  This cannot be changed later, since the UI is very different.
   if (this.options.hasCategories) {
@@ -497,6 +500,10 @@ Blockly.WorkspaceSvg.prototype.dispose = function() {
   this.rendered = false;
   if (this.currentGesture_) {
     this.currentGesture_.cancel();
+  }
+  if (this.intersectionObserver) {
+    this.intersectionObserver.dispose();
+    this.intersectionObserver = null;
   }
   Blockly.WorkspaceSvg.superClass_.dispose.call(this);
   if (this.svgGroup_) {
@@ -677,6 +684,12 @@ Blockly.WorkspaceSvg.prototype.resizeContents = function() {
   this.updateInverseScreenCTM();
 };
 
+Blockly.WorkspaceSvg.prototype.queueIntersectionCheck = function() {
+  if (this.intersectionObserver) {
+    this.intersectionObserver.queueIntersectionCheck();
+  }
+};
+
 /**
  * Resize and reposition all of the workspace chrome (toolbox,
  * trash, scrollbars etc.)
@@ -701,6 +714,7 @@ Blockly.WorkspaceSvg.prototype.resize = function() {
     this.scrollbar.resize();
   }
   this.updateScreenCalculations_();
+  this.queueIntersectionCheck();
 };
 
 /**
@@ -772,6 +786,7 @@ Blockly.WorkspaceSvg.prototype.translate = function(x, y) {
   if (this.blockDragSurface_) {
     this.blockDragSurface_.translateAndScaleGroup(x, y, this.scale);
   }
+  this.queueIntersectionCheck();
 };
 
 /**
@@ -986,7 +1001,7 @@ Blockly.WorkspaceSvg.prototype.reportValue = function(id, value) {
   var contentDiv = Blockly.DropDownDiv.getContentDiv();
   var valueReportBox = goog.dom.createElement('div');
   valueReportBox.setAttribute('class', 'valueReportBox');
-  valueReportBox.innerHTML = Blockly.scratchBlocksUtils.encodeEntities(value);
+  valueReportBox.textContent = value;
   contentDiv.appendChild(valueReportBox);
   Blockly.DropDownDiv.setColour(
       Blockly.Colours.valueReportBackground,
@@ -1805,6 +1820,7 @@ Blockly.WorkspaceSvg.prototype.setScale = function(newScale) {
     // No toolbox, resize flyout.
     this.flyout_.reflow();
   }
+  this.queueIntersectionCheck();
 };
 
 /**
