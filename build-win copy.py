@@ -54,26 +54,17 @@ CLOSURE_COMPILER = REMOTE_COMPILER
 CLOSURE_DIR_NPM = "node_modules"
 CLOSURE_ROOT_NPM = os.path.join("node_modules")
 CLOSURE_LIBRARY_NPM = "google-closure-library"
-# CLOSURE_COMPILER_NPM = "google-closure-compiler"
-# The os-module lets us run different code dependent on which operating system the code is running on. 
-# 'nt' means that you are running windows, and 'posix' mac.
-# (Source: https://teamtreehouse.com/community/i-dont-understand-osnament-what-is-nt-and-osname)
-CLOSURE_COMPILER_NPM = (
-    "google-closure-compiler.cmd" if os.name == "nt" else "google-closure-compiler"
-)
+CLOSURE_COMPILER_NPM = "google-closure-compiler"
 
 
 def init_closure_library():
     """Initialize the closure library for closure compiler to use.
     Only work when the OS is windows.
     """
-    print("CLOSURE_ROOT_NPM: " + CLOSURE_ROOT_NPM)
-    print("CLOSURE_LIBRARY_NPM: " + CLOSURE_LIBRARY_NPM)
     if sys.platform != "win32":
         return
     src = os.path.join(os.getcwd(), CLOSURE_ROOT_NPM, CLOSURE_LIBRARY_NPM)
     dst = os.path.join(os.getcwd(), "..", CLOSURE_LIBRARY)
-    # dst = os.path.join(os.getcwd(), CLOSURE_ROOT_NPM, CLOSURE_LIBRARY_NPM)
     # adminPrefixArg = ["runas", "/env", "/noprofile", "/user:" + os.environ.get("USERNAME")]
     args = ["mklink /J ", dst, src]
     try:
@@ -303,8 +294,6 @@ class Gen_compressed(threading.Thread):
             target_filename = "blockly_compressed_horizontal.js"
             search_paths = self.search_paths_horizontal
         print("Generating " + target_filename)
-        # !!!
-        # ???
         # Define the parameters for the POST request.
         params = [
             (
@@ -479,8 +468,6 @@ class Gen_compressed(threading.Thread):
     def report_errors(self, target_filename, filenames, json_data):
         def file_lookup(name):
             if not name.startswith("Input_"):
-                # ???
-                # !!!
                 return "???"
             n = int(name[6:]) - 1
             return filenames[n]
@@ -720,7 +707,6 @@ if __name__ == "__main__":
                 CLOSURE_ROOT_NPM, ".bin", CLOSURE_COMPILER_NPM + ".cmd"
             )
             print("Using java compiler: " + closure_compiler)
-            print('not os.path.exists(closure_compiler) and platform_postfix != ""')
         else:
             print("Detected native compiler: " + closure_compiler)
 
@@ -738,8 +724,7 @@ if __name__ == "__main__":
         assert stdout == read(os.path.join("build", "test_expect.js")).encode("utf-8")
 
         print("Using local compiler: google-closure-compiler ...\n")
-    # except (ImportError, AssertionError, WindowsError):
-    except (ImportError, AssertionError):
+    except (ImportError, AssertionError, WindowsError):
         print("Using remote compiler: closure-compiler.appspot.com ...\n")
 
         try:

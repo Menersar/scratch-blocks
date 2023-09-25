@@ -37,8 +37,8 @@
 import sys
 
 # if sys.version_info[0] != 2:
-#   raise Exception("Blockly build only compatible with Python 2.x.\n"
-#                   "You are using: " + sys.version)
+# raise Exception("Blockly build only compatible with Python 2.x.\n"
+#                 "You are using: " + sys.version)
 
 import errno, glob, http.client, json, os, re, subprocess, threading, urllib
 from importlib import reload
@@ -54,10 +54,6 @@ CLOSURE_COMPILER = REMOTE_COMPILER
 CLOSURE_DIR_NPM = "node_modules"
 CLOSURE_ROOT_NPM = os.path.join("node_modules")
 CLOSURE_LIBRARY_NPM = "google-closure-library"
-# CLOSURE_COMPILER_NPM = "google-closure-compiler"
-# The os-module lets us run different code dependent on which operating system the code is running on. 
-# 'nt' means that you are running windows, and 'posix' mac.
-# (Source: https://teamtreehouse.com/community/i-dont-understand-osnament-what-is-nt-and-osname)
 CLOSURE_COMPILER_NPM = (
     "google-closure-compiler.cmd" if os.name == "nt" else "google-closure-compiler"
 )
@@ -74,6 +70,7 @@ def init_closure_library():
     src = os.path.join(os.getcwd(), CLOSURE_ROOT_NPM, CLOSURE_LIBRARY_NPM)
     dst = os.path.join(os.getcwd(), "..", CLOSURE_LIBRARY)
     # dst = os.path.join(os.getcwd(), CLOSURE_ROOT_NPM, CLOSURE_LIBRARY_NPM)
+    # (Source: https://github.com/Clipteam/clipcc-block)
     # adminPrefixArg = ["runas", "/env", "/noprofile", "/user:" + os.environ.get("USERNAME")]
     args = ["mklink /J ", dst, src]
     try:
@@ -107,6 +104,7 @@ def import_path(fullpath):
     filename, ext = os.path.splitext(filename)
     sys.path.append(path)
     module = __import__(filename)
+    # !!! 'Might be', etc.(?!)? ???
     reload(module)  # Might be out of date.
     del sys.path[-1]
     return module
@@ -303,10 +301,9 @@ class Gen_compressed(threading.Thread):
             target_filename = "blockly_compressed_horizontal.js"
             search_paths = self.search_paths_horizontal
         print("Generating " + target_filename)
-        # !!!
-        # ???
         # Define the parameters for the POST request.
         params = [
+            # ("compilation_level", "SIMPLE"),
             (
                 "compilation_level",
                 "SIMPLE"
@@ -400,19 +397,23 @@ class Gen_compressed(threading.Thread):
             if pair[0][2:] not in filter_keys:
                 dash_args.extend(pair)
 
-        # Build the final args array by prepending google-closure-compiler to
+        # Build the final args array by prepending CLOSURE_COMPILER_NPM to
         # dash_args and dropping any falsy members
         temp_file = tempfile.NamedTemporaryFile(delete=False)
         temp_file_name = temp_file.name
-        # args = ["google-closure-compiler", "--flagfile=" + temp_file_name]
+        # args = []
         args = [closure_compiler, "--flagfile=" + temp_file_name]
 
-        if sys.platform == "win32":
-            if platform_postfix == "":
-                args[0] = os.path.join(
-                    CLOSURE_ROOT_NPM, ".bin", CLOSURE_COMPILER_NPM + ".cmd"
-                )
+        # I think that is already resolved by the code line:
+        # 'CLOSURE_COMPILER_NPM = ("google-closure-compiler.cmd" if os.name == "nt" else "google-closure-compiler")'
+        # if sys.platform == "win32":
+        #     if platform_postfix == "":
+        #         args[0] = os.path.join(
+        #             CLOSURE_ROOT_NPM, ".bin", CLOSURE_COMPILER_NPM + ".cmd"
+        #         )
 
+        # for group in [[CLOSURE_COMPILER_NPM], dash_args]:
+        #     args.extend(filter(lambda item: item, group))
         for argv in dash_args:
             temp_file.write((argv + " ").encode("utf-8"))
         temp_file.close()
@@ -479,8 +480,6 @@ class Gen_compressed(threading.Thread):
     def report_errors(self, target_filename, filenames, json_data):
         def file_lookup(name):
             if not name.startswith("Input_"):
-                # ???
-                # !!!
                 return "???"
             n = int(name[6:]) - 1
             return filenames[n]
@@ -695,34 +694,34 @@ if __name__ == "__main__":
         closure_root = CLOSURE_ROOT_NPM
         closure_library = CLOSURE_LIBRARY_NPM
         closure_compiler = CLOSURE_COMPILER_NPM
-        platform_postfix = ""
+        # platform_postfix = ""
 
-        if sys.platform == "win32" or sys.platform == "cygwin":
-            platform_postfix = "-windows"
-            closure_compiler = os.path.join(
-                CLOSURE_ROOT_NPM,
-                CLOSURE_COMPILER_NPM + platform_postfix,
-                "compiler.exe",
-            )
-        elif sys.platform == "linux":
-            platform_postfix = "-linux"
-            closure_compiler = os.path.join(
-                CLOSURE_ROOT_NPM, CLOSURE_COMPILER_NPM + platform_postfix, "compiler"
-            )
-        elif sys.platform == "darwin":
-            platform_postfix = "-osx"
-            closure_compiler = os.path.join(
-                CLOSURE_ROOT_NPM, CLOSURE_COMPILER_NPM + platform_postfix, "compiler"
-            )
+        # if sys.platform == "win32" or sys.platform == "cygwin":
+        #     platform_postfix = "-windows"
+        #     closure_compiler = os.path.join(
+        #         CLOSURE_ROOT_NPM,
+        #         CLOSURE_COMPILER_NPM + platform_postfix,
+        #         "compiler.exe",
+        #     )
+        # elif sys.platform == "linux":
+        #     platform_postfix = "-linux"
+        #     closure_compiler = os.path.join(
+        #         CLOSURE_ROOT_NPM, CLOSURE_COMPILER_NPM + platform_postfix, "compiler"
+        #     )
+        # elif sys.platform == "darwin":
+        #     platform_postfix = "-osx"
+        #     closure_compiler = os.path.join(
+        #         CLOSURE_ROOT_NPM, CLOSURE_COMPILER_NPM + platform_postfix, "compiler"
+        #     )
 
-        if not os.path.exists(closure_compiler) and platform_postfix != "":
-            closure_compiler = os.path.join(
-                CLOSURE_ROOT_NPM, ".bin", CLOSURE_COMPILER_NPM + ".cmd"
-            )
-            print("Using java compiler: " + closure_compiler)
-            print('not os.path.exists(closure_compiler) and platform_postfix != ""')
-        else:
-            print("Detected native compiler: " + closure_compiler)
+        # if not os.path.exists(closure_compiler) and platform_postfix != "":
+        #     closure_compiler = os.path.join(
+        #         CLOSURE_ROOT_NPM, ".bin", CLOSURE_COMPILER_NPM + ".cmd"
+        #     )
+        #     print("Using java compiler: " + closure_compiler)
+        #     print('not os.path.exists(closure_compiler) and platform_postfix != ""')
+        # else:
+        #     print("Detected native compiler: " + closure_compiler)
 
         # Load calcdeps from the local library
         calcdeps = import_path(
@@ -737,8 +736,8 @@ if __name__ == "__main__":
         (stdout, _) = test_proc.communicate()
         assert stdout == read(os.path.join("build", "test_expect.js")).encode("utf-8")
 
+        # print("Using local compiler: %s ...\n" % CLOSURE_COMPILER_NPM)
         print("Using local compiler: google-closure-compiler ...\n")
-    # except (ImportError, AssertionError, WindowsError):
     except (ImportError, AssertionError):
         print("Using remote compiler: closure-compiler.appspot.com ...\n")
 
@@ -774,6 +773,12 @@ if __name__ == "__main__":
                 )
             sys.exit(1)
 
+    # search_paths = calcdeps.ExpandDirectories(
+    #     ["core", os.path.join(closure_root, closure_library)]
+    # )
+
+    # search_paths_horizontal = filter(exclude_vertical, search_paths)
+    # search_paths_vertical = filter(exclude_horizontal, search_paths)
     search_paths = list(
         calcdeps.ExpandDirectories(
             ["core", os.path.join(closure_root, closure_library)]
@@ -795,16 +800,20 @@ if __name__ == "__main__":
     # Uncompressed is limited by processor speed.
     # Compressed is limited by network and server speed.
     # Vertical:
+    # Gen_uncompressed(search_paths_vertical, True, closure_env).start()
     threads.append(Gen_uncompressed(search_paths_vertical, True, closure_env))
     # Horizontal:
+    # Gen_uncompressed(search_paths_horizontal, False, closure_env).start()
     threads.append(Gen_uncompressed(search_paths_horizontal, False, closure_env))
 
     # Compressed forms of vertical and horizontal.
     threads.append(
+        # Gen_compressed(search_paths_vertical, search_paths_horizontal, closure_env).start()
         Gen_compressed(search_paths_vertical, search_paths_horizontal, closure_env)
     )
 
     # This is run locally in a separate thread.
+    # Gen_langfiles().start()
     threads.append(Gen_langfiles())
 
     for t in threads:
