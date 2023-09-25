@@ -232,12 +232,14 @@ Blockly.Procedures.flyoutCategory = function(workspace) {
     var procCode = mutation.getAttribute('proccode');
     // // Allow custom boolean reporters.
     // // if (Blockly.Procedures.procedureContainsReturn(procCode, workspace)) {
+    // eslint-disable-next-line max-len
     // if (Blockly.Procedures.procedureContainsReturnType(procCode, workspace) === Blockly.PROCEDURES_CALL_TYPE_REPORTER) {
     var returnType = Blockly.Procedures.getProcedureReturnType(procCode, workspace);
 
     //   mutation.setAttribute('return', Blockly.PROCEDURES_CALL_TYPE_REPORTER);
 
     // // Allow custom boolean reporters.
+    // eslint-disable-next-line max-len
     // } else if (Blockly.Procedures.procedureContainsReturnType(procCode, workspace) === Blockly.PROCEDURES_CALL_TYPE_BOOLEAN) {
     //   mutation.setAttribute('return', Blockly.PROCEDURES_CALL_TYPE_BOOLEAN);
     // }

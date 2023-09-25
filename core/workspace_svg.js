@@ -741,22 +741,22 @@ Blockly.WorkspaceSvg.prototype.processProcedureReturnsChanged_ = function() {
   this.procedureReturnChangeTimeout_ = null;
 
   // !!! LOL? ???
-//   // Don't fire events for each block, instead batch them all together.
-//   // This is called after a gesture ends, or after a timeout (e.g. when
-//   // a procedure mutator is opened or closed).
-//   // This is necessary because the return type of a procedure call can
-//   // change when a procedure mutator is opened or closed, and we don't
-//   // want to fire events for each block in that case.
-//   // We also don't want to fire events for each block when a procedure
-//   // mutator is opened or closed because that would cause the toolbox
-//   // to refresh multiple times, which is slow.
-//   // Instead, we fire one event for all the blocks that changed.
-//   // This is also called when a procedure mutator is opened or closed,
-//   // because the return type of a procedure call can change when a
-//   // procedure mutator is opened or closed.
-//   // This is also called when a procedure definition is changed,
-//   // because the return type of a procedure call can change when a
-//   // procedure definition is changed.
+  //   // Don't fire events for each block, instead batch them all together.
+  //   // This is called after a gesture ends, or after a timeout (e.g. when
+  //   // a procedure mutator is opened or closed).
+  //   // This is necessary because the return type of a procedure call can
+  //   // change when a procedure mutator is opened or closed, and we don't
+  //   // want to fire events for each block in that case.
+  //   // We also don't want to fire events for each block when a procedure
+  //   // mutator is opened or closed because that would cause the toolbox
+  //   // to refresh multiple times, which is slow.
+  //   // Instead, we fire one event for all the blocks that changed.
+  //   // This is also called when a procedure mutator is opened or closed,
+  //   // because the return type of a procedure call can change when a
+  //   // procedure mutator is opened or closed.
+  //   // This is also called when a procedure definition is changed,
+  //   // because the return type of a procedure call can change when a
+  //   // procedure definition is changed.
 
   // Update shape of loose blocks when return types change.
   Blockly.Events.setGroup(true);
@@ -786,15 +786,15 @@ Blockly.WorkspaceSvg.prototype.processProcedureReturnsChanged_ = function() {
       !Object.prototype.hasOwnProperty.call(finalTypes, procCode)
     ) continue;
 
-      // Allow custom boolean reporters.
-      // var actuallyReturns = Blockly.Procedures.procedureContainsReturn(procCode, this);
+    // Allow custom boolean reporters.
+    // var actuallyReturns = Blockly.Procedures.procedureContainsReturn(procCode, this);
 
-      // if (actuallyReturns && block.getReturn() === Blockly.PROCEDURES_CALL_TYPE_STATEMENT) {
-      //   Blockly.Procedures.changeReturnType(block, Blockly.PROCEDURES_CALL_TYPE_REPORTER);
-      // } else if (!actuallyReturns && block.getReturn() !== Blockly.PROCEDURES_CALL_TYPE_STATEMENT) {
-      //   Blockly.Procedures.changeReturnType(block, Blockly.PROCEDURES_CALL_TYPE_STATEMENT);
-      // }
-      // var actuallyReturns = Blockly.Procedures.procedureContainsReturnType(procCode, this);
+    // if (actuallyReturns && block.getReturn() === Blockly.PROCEDURES_CALL_TYPE_STATEMENT) {
+    //   Blockly.Procedures.changeReturnType(block, Blockly.PROCEDURES_CALL_TYPE_REPORTER);
+    // } else if (!actuallyReturns && block.getReturn() !== Blockly.PROCEDURES_CALL_TYPE_STATEMENT) {
+    //   Blockly.Procedures.changeReturnType(block, Blockly.PROCEDURES_CALL_TYPE_STATEMENT);
+    // }
+    // var actuallyReturns = Blockly.Procedures.procedureContainsReturnType(procCode, this);
     var actualReturnType = finalTypes[procCode];
     
     // if (actuallyReturns !== block.getReturn()) {
@@ -806,7 +806,7 @@ Blockly.WorkspaceSvg.prototype.processProcedureReturnsChanged_ = function() {
       // The definition's shape has actually changed.
       (!Blockly.Procedures.USER_CAN_CHANGE_CALL_TYPE || initialTypes[procCode] !== actualReturnType)
     ) {
-        // Blockly.Procedures.changeReturnType(block, actuallyReturns);
+      // Blockly.Procedures.changeReturnType(block, actuallyReturns);
       Blockly.Procedures.changeReturnType(block, actualReturnType);
     }
 
