@@ -14,3 +14,4 @@
 /gh-pages/*
 /webpack.config.js
 /build/*
+/node_modules/*
