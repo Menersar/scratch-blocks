@@ -1,10 +1,11 @@
 # Development files
-/.circleci
+# /.circleci
 .eslintrc
 /.editorconfig
 /.eslintignore
 /.gitattributes
 /.github
+/.travis.yml
 /.tx
 /tests
 /webpack.config.js

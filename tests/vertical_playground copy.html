@@ -136,7 +136,6 @@
         var xml = Blockly.Xml.textToDom(input.value);
         Blockly.Xml.domToWorkspace(xml, workspace);
         workspace.refreshToolboxSelection_();
-        // !!! 'taChange', etc.(?!)? ???
         taChange();
       }
 

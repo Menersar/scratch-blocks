@@ -32,7 +32,6 @@ goog.require('Blockly.ScratchBlocks.VerticalExtensions');
 
 // Serialization and deserialization.
 
-// Implementation of procedure returns.
 Blockly.ScratchBlocks.ProcedureUtils.parseReturnMutation = function(xmlElement) {
   if (xmlElement.hasAttribute('return')) {
     var type = +xmlElement.getAttribute('return');
@@ -58,8 +57,6 @@ Blockly.ScratchBlocks.ProcedureUtils.callerMutationToDom = function() {
   container.setAttribute('proccode', this.procCode_);
   container.setAttribute('argumentids', JSON.stringify(this.argumentIds_));
   container.setAttribute('warp', JSON.stringify(this.warp_));
-  // Only save return in mutation if it is NOT the default value.
-  // container.setAttribute('return', this.return_);
   // Do not save return in mutation if it is default value.
   if (this.return_ !== Blockly.PROCEDURES_CALL_TYPE_STATEMENT) {
     container.setAttribute('return', this.return_);
@@ -169,17 +166,10 @@ Blockly.ScratchBlocks.ProcedureUtils.updateDisplay_ = function() {
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
     } else {
-      // // Allow custom reporters to be dropped into boolean inputs.
-      // Allow custom boolean reporters.
-      // this.setOutput(true, 'Number');
-      // // this.setOutput(true, null);
       if (this.getReturn() === Blockly.PROCEDURES_CALL_TYPE_BOOLEAN) {
-        // Allow custom boolean reporters.
         this.setOutput(true, null);
         this.setOutputShape(Blockly.OUTPUT_SHAPE_HEXAGONAL);
       } else {
-        // // Allow custom boolean reporters.
-        // this.setOutput(true, 'Number');
         this.setOutput(true, Blockly.Procedures.ENFORCE_TYPES ? 'Number' : null);
         this.setOutputShape(Blockly.OUTPUT_SHAPE_ROUND);
       }
@@ -283,14 +273,13 @@ Blockly.ScratchBlocks.ProcedureUtils.createAllInputs_ = function(connectionMap) 
       labelText = component.trim();
     }
     labelText = labelText.replace(/\\%/, '%');
-    // Do not add empty labels (that generally will just use up space).
+    // don't add empty labels which will just waste space
     if (labelText) {
       this.addProcedureLabel_(labelText);
       hasAnyField = true;
     }
-    // this.addProcedureLabel_(labelText.replace(/\\%/, '%'));
   }
-  // Prevent editor crashing by this (due to custom reporters without fields).
+  // Custom reporters will crash editor if they have no fields.
   if (!hasAnyField) {
     this.addProcedureLabel_(' ');
   }
@@ -726,10 +715,9 @@ Blockly.ScratchBlocks.ProcedureUtils.setWarp = function(warp) {
   this.warp_ = warp;
 };
 
-// !!! 'enum in 'constants.js'', etc.(?!)? ???
 /**
  * @this {BlockSvg}
- * @returns {number} The value of the `return_` property. See enum in 'constants.js'.
+ * @returns {number} Value of the return_ property. See enum in constants.js
  */
 Blockly.ScratchBlocks.ProcedureUtils.getReturn = function() {
   return this.return_;
@@ -863,7 +851,6 @@ Blockly.Blocks['procedures_call'] = {
    */
   init: function() {
     this.jsonInit({
-      // "extensions": ["colours_more", "shape_statement", "procedure_call_contextmenu"]
       "extensions": ["colours_more", "procedure_call_contextmenu"]
     });
     this.procCode_ = '';
@@ -1015,7 +1002,6 @@ Blockly.Blocks['argument_editor_boolean'] = {
       "colour": Blockly.Colours.textField,
       "colourSecondary": Blockly.Colours.textField,
       "colourTertiary": Blockly.Colours.textField,
-      // "colourQuaternary": Blockly.Colours.textField,
       "extensions": ["output_boolean"]
     });
   },
@@ -1036,7 +1022,6 @@ Blockly.Blocks['argument_editor_string_number'] = {
       "colour": Blockly.Colours.textField,
       "colourSecondary": Blockly.Colours.textField,
       "colourTertiary": Blockly.Colours.textField,
-      // "colourQuaternary": Blockly.Colours.textField,
       "extensions": ["output_number", "output_string"]
     });
   },

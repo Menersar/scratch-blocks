@@ -250,11 +250,9 @@ Blockly.FieldDropdown.prototype.showEditor_ = function() {
   // Update colour to look selected.
   if (!this.disableColourChange_) {
     if (this.sourceBlock_.isShadow()) {
-      // this.sourceBlock_.setShadowColour(this.sourceBlock_.getColourQuaternary());
       this.sourceBlock_.setShadowColour(this.sourceBlock_.getColourTertiary());
     } else if (this.box_) {
       this.box_.setAttribute('fill', this.sourceBlock_.getColourTertiary());
-      // this.box_.setAttribute('fill', this.sourceBlock_.getColourQuaternary());
     }
   }
 };
@@ -295,8 +293,6 @@ Blockly.FieldDropdown.prototype.onItemSelected = function(menu, menuItem) {
   }
 };
 
-// Factor out common words in statically defined options.
-// Create prefix and/or suffix labels.
 /**
  * @private
  */
@@ -307,7 +303,6 @@ Blockly.FieldDropdown.prototype.trimOptions_ = function() {
   if (!goog.isArray(options)) {
     return;
   }
-  // var hasImages = false;
 
   // Localize label text and image alt text.
   for (var i = 0; i < options.length; i++) {
@@ -318,42 +313,8 @@ Blockly.FieldDropdown.prototype.trimOptions_ = function() {
       if (label.alt != null) {
         options[i][0].alt = Blockly.utils.replaceMessageReferences(label.alt);
       }
-      // hasImages = true;
     }
   }
-  // !!! ???
-  // if (hasImages || options.length < 2) {
-  //   return;  // Do nothing if too few items or at least one label is an image.
-  // }
-  // var strings = [];
-  // for (var i = 0; i < options.length; i++) {
-  //   strings.push(options[i][0]);
-  // }
-  // var shortest = Blockly.utils.shortestStringLength(strings);
-  // var prefixLength = Blockly.utils.commonWordPrefix(strings, shortest);
-  // var suffixLength = Blockly.utils.commonWordSuffix(strings, shortest);
-  // if (!prefixLength && !suffixLength) {
-  //   return;
-  // }
-  // if (shortest <= prefixLength + suffixLength) {
-  //   // One or more strings will entirely vanish if we proceed.  Abort.
-  //   return;
-  // }
-  // if (prefixLength) {
-  //   this.prefixField = strings[0].substring(0, prefixLength - 1);
-  // }
-  // if (suffixLength) {
-  //   this.suffixField = strings[0].substr(1 - suffixLength);
-  // }
-  // // Remove the prefix and suffix from the options.
-  // var newOptions = [];
-  // for (var i = 0; i < options.length; i++) {
-  //   var text = options[i][0];
-  //   var value = options[i][1];
-  //   text = text.substring(prefixLength, text.length - suffixLength);
-  //   newOptions[i] = [text, value];
-  // }
-  // this.menuGenerator_ = newOptions;
 };
 
 /**

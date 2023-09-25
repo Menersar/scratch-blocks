@@ -81,7 +81,7 @@ echo Miscellaneous cleanup...
 keep_ours=".github/ISSUE_TEMPLATE.md \
 .github/PULL_REQUEST_TEMPLATE.md \
 .gitignore \
-.circleci/config.yml \
+.travis.yml \
 core/block_animations.js \
 msg/messages.js \
 msg/js/en.js \

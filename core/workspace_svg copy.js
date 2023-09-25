@@ -119,9 +119,7 @@ Blockly.WorkspaceSvg = function(options, opt_blockDragSurface, opt_wsDragSurface
 
   this.procedureReturnsEnabled = Blockly.Procedures.DEFAULT_ENABLE_RETURNS;
   this.initialProcedureReturnTypes_ = null;
-  // this.procedureReturnChangeTimeout = null;
   this.procedureReturnChangeTimeout_ = null;
-  // this.checkProcedureReturnAfterGesture = false;
   this.checkProcedureReturnAfterGesture_ = false;
 };
 goog.inherits(Blockly.WorkspaceSvg, Blockly.Workspace);
@@ -565,9 +563,7 @@ Blockly.WorkspaceSvg.prototype.dispose = function() {
     Blockly.unbindEvent_(this.resizeHandlerWrapper_);
     this.resizeHandlerWrapper_ = null;
   }
-  // if (this.procedureReturnChangeTimeout) {
   if (this.procedureReturnChangeTimeout_) {
-    // clearTimeout(this.procedureReturnChangeTimeout);
     clearTimeout(this.procedureReturnChangeTimeout_);
   }
 };
@@ -702,7 +698,6 @@ Blockly.WorkspaceSvg.prototype.queueIntersectionCheck = function() {
   }
 };
 
-// Blockly.WorkspaceSvg.prototype.procedureReturnsChanged = function() {
 /**
  * Call *before* modifying scripts.
  */
@@ -715,20 +710,12 @@ Blockly.WorkspaceSvg.prototype.procedureReturnsWillChange = function() {
   this.initialProcedureReturnTypes_ = Blockly.Procedures.getAllProcedureReturnTypes(this);
 
   if (this.currentGesture_) {
-    // this.checkProcedureReturnAfterGesture = true;
     this.checkProcedureReturnAfterGesture_ = true;
-  // } else if (!this.procedureReturnChangeTimeout) {
-  //   this.procedureReturnChangeTimeout = setTimeout(function() {
-  //     this.procedureReturnChangeTimeout = null;
-  //     this.processProcedureReturnsChanged();
-  //   }.bind(this));
-  // }
   } else {
     this.procedureReturnChangeTimeout_ = setTimeout(this.processProcedureReturnsChanged_.bind(this));
   }
 };
 
-// Blockly.WorkspaceSvg.prototype.processProcedureReturnsChanged = function() {
 /**
  * @private
  */
@@ -740,88 +727,43 @@ Blockly.WorkspaceSvg.prototype.processProcedureReturnsChanged_ = function() {
   this.checkProcedureReturnAfterGesture_ = false;
   this.procedureReturnChangeTimeout_ = null;
 
-  // !!! LOL? ???
-//   // Don't fire events for each block, instead batch them all together.
-//   // This is called after a gesture ends, or after a timeout (e.g. when
-//   // a procedure mutator is opened or closed).
-//   // This is necessary because the return type of a procedure call can
-//   // change when a procedure mutator is opened or closed, and we don't
-//   // want to fire events for each block in that case.
-//   // We also don't want to fire events for each block when a procedure
-//   // mutator is opened or closed because that would cause the toolbox
-//   // to refresh multiple times, which is slow.
-//   // Instead, we fire one event for all the blocks that changed.
-//   // This is also called when a procedure mutator is opened or closed,
-//   // because the return type of a procedure call can change when a
-//   // procedure mutator is opened or closed.
-//   // This is also called when a procedure definition is changed,
-//   // because the return type of a procedure call can change when a
-//   // procedure definition is changed.
-
-  // Update shape of loose blocks when return types change.
   Blockly.Events.setGroup(true);
   var topBlocks = this.getTopBlocks(false);
   for (var i = 0; i < topBlocks.length; i++) {
     var block = topBlocks[i];
-    // if (!block.getNextBlock() && block.type === Blockly.PROCEDURES_CALL_BLOCK_TYPE) {
     if (block.type !== Blockly.PROCEDURES_CALL_BLOCK_TYPE) continue;
 
-    // !!! ???
-    // After a gesture, call is early enough, so that:
-    // There could still be insertion markers.
+    // After a gesture, we are called early enough that there could still be insertion markers.
     if (block.isInsertionMarker()) continue;
 
-    // Because this block is a top block:
-    // It will not have a parent by definition.
-    // If another block is connected below:
-    // It should be left unchanged (instead of unplugging).
+    // Because this block is a top block, it by definition won't have a parent, but if another
+    // block is connected below, we should leave it unchanged instead of unplugging.
     if (block.getNextBlock()) continue;
 
     var procCode = block.getProcCode();
-    // If the procedure does not exist or is new:
-    // Ignore it.
-    // (Fix procedure call type being lost when proccode changes.)
+    // If the procedure doesn't exist or is new, ignore it.
     if (
       !Object.prototype.hasOwnProperty.call(initialTypes, procCode) ||
       !Object.prototype.hasOwnProperty.call(finalTypes, procCode)
     ) continue;
 
-      // Allow custom boolean reporters.
-      // var actuallyReturns = Blockly.Procedures.procedureContainsReturn(procCode, this);
-
-      // if (actuallyReturns && block.getReturn() === Blockly.PROCEDURES_CALL_TYPE_STATEMENT) {
-      //   Blockly.Procedures.changeReturnType(block, Blockly.PROCEDURES_CALL_TYPE_REPORTER);
-      // } else if (!actuallyReturns && block.getReturn() !== Blockly.PROCEDURES_CALL_TYPE_STATEMENT) {
-      //   Blockly.Procedures.changeReturnType(block, Blockly.PROCEDURES_CALL_TYPE_STATEMENT);
-      // }
-      // var actuallyReturns = Blockly.Procedures.procedureContainsReturnType(procCode, this);
     var actualReturnType = finalTypes[procCode];
-    
-    // if (actuallyReturns !== block.getReturn()) {
     if (
       block.getReturn() !== actualReturnType &&
-      // actuallyReturns !== block.getReturn()
-      // If a user is allowed to override call block shape:
-      // Only update the shape if:
-      // The definition's shape has actually changed.
+      // If user is allowed to override call block shape, only update the shape if the definition's
+      // shape has actually changed.
       (!Blockly.Procedures.USER_CAN_CHANGE_CALL_TYPE || initialTypes[procCode] !== actualReturnType)
     ) {
-        // Blockly.Procedures.changeReturnType(block, actuallyReturns);
       Blockly.Procedures.changeReturnType(block, actualReturnType);
     }
-
-    // }
   }
   Blockly.Events.setGroup(false);
 
-  // Toolbox refresh can be slow, thus:
-  // Only perform toolbox refresh when needed.
+  // Toolbox refresh can be slow, so only do when needed.
   var toolboxOutdated = false;
   for (var procCode in finalTypes) {
-    // If a current procedure existed but its type has changed:
-    // The toolbox must be updated.
-    // If a new procedure was created:
-    // The toolbox is already updated elsewhere.
+    // If a current procedure existed but its type has changed, the toolbox must be updated.
+    // If a new procedure was created, the toolbox is already updated elsewhere.
     if (
       Object.prototype.hasOwnProperty.call(initialTypes, procCode) &&
       initialTypes[procCode] !== finalTypes[procCode]
@@ -2384,10 +2326,7 @@ Blockly.WorkspaceSvg.prototype.getGesture = function(e) {
 Blockly.WorkspaceSvg.prototype.clearGesture = function() {
   this.currentGesture_ = null;
 
-  // if (this.checkProcedureReturnAfterGesture) {
   if (this.checkProcedureReturnAfterGesture_) {
-    // this.checkProcedureReturnAfterGesture = false;
-    // this.processProcedureReturnsChanged();
     this.processProcedureReturnsChanged_();
   }
 };
