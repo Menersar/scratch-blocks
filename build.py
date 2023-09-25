@@ -716,6 +716,7 @@ if __name__ == "__main__":
                 CLOSURE_ROOT_NPM, ".bin", CLOSURE_COMPILER_NPM + ".cmd"
             )
             print("Using java compiler: " + closure_compiler)
+            print('not os.path.exists(closure_compiler) and platform_postfix != ""')
         else:
             print("Detected native compiler: " + closure_compiler)
 
