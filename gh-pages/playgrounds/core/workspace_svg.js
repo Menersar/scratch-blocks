@@ -50,6 +50,7 @@ goog.require('Blockly.WorkspaceCommentSvg.render');
 goog.require('Blockly.WorkspaceDragSurfaceSvg');
 goog.require('Blockly.Xml');
 goog.require('Blockly.ZoomControls');
+goog.require('Blockly.IntersectionObserver');
 
 goog.require('goog.array');
 goog.require('goog.dom');
@@ -115,6 +116,13 @@ Blockly.WorkspaceSvg = function(options, opt_blockDragSurface, opt_wsDragSurface
       Blockly.DataCategory);
   this.registerToolboxCategoryCallback(Blockly.PROCEDURE_CATEGORY_NAME,
       Blockly.Procedures.flyoutCategory);
+
+  this.procedureReturnsEnabled = Blockly.Procedures.DEFAULT_ENABLE_RETURNS;
+  this.initialProcedureReturnTypes_ = null;
+  // this.procedureReturnChangeTimeout = null;
+  this.procedureReturnChangeTimeout_ = null;
+  // this.checkProcedureReturnAfterGesture = false;
+  this.checkProcedureReturnAfterGesture_ = false;
 };
 goog.inherits(Blockly.WorkspaceSvg, Blockly.Workspace);
 
@@ -472,6 +480,8 @@ Blockly.WorkspaceSvg.prototype.createDom = function(opt_backgroundClass) {
     }
   }
 
+  this.intersectionObserver = new Blockly.IntersectionObserver(this);
+
   // Determine if there needs to be a category tree, or a simple list of
   // blocks.  This cannot be changed later, since the UI is very different.
   if (this.options.hasCategories) {
@@ -497,6 +507,10 @@ Blockly.WorkspaceSvg.prototype.dispose = function() {
   this.rendered = false;
   if (this.currentGesture_) {
     this.currentGesture_.cancel();
+  }
+  if (this.intersectionObserver) {
+    this.intersectionObserver.dispose();
+    this.intersectionObserver = null;
   }
   Blockly.WorkspaceSvg.superClass_.dispose.call(this);
   if (this.svgGroup_) {
@@ -550,6 +564,11 @@ Blockly.WorkspaceSvg.prototype.dispose = function() {
   if (this.resizeHandlerWrapper_) {
     Blockly.unbindEvent_(this.resizeHandlerWrapper_);
     this.resizeHandlerWrapper_ = null;
+  }
+  // if (this.procedureReturnChangeTimeout) {
+  if (this.procedureReturnChangeTimeout_) {
+    // clearTimeout(this.procedureReturnChangeTimeout);
+    clearTimeout(this.procedureReturnChangeTimeout_);
   }
 };
 
@@ -677,6 +696,152 @@ Blockly.WorkspaceSvg.prototype.resizeContents = function() {
   this.updateInverseScreenCTM();
 };
 
+Blockly.WorkspaceSvg.prototype.queueIntersectionCheck = function() {
+  if (this.intersectionObserver) {
+    this.intersectionObserver.queueIntersectionCheck();
+  }
+};
+
+// Blockly.WorkspaceSvg.prototype.procedureReturnsChanged = function() {
+/**
+ * Call *before* modifying scripts.
+ */
+Blockly.WorkspaceSvg.prototype.procedureReturnsWillChange = function() {
+  if (this.initialProcedureReturnTypes_) {
+    // Already queued.
+    return;
+  }
+
+  this.initialProcedureReturnTypes_ = Blockly.Procedures.getAllProcedureReturnTypes(this);
+
+  if (this.currentGesture_) {
+    // this.checkProcedureReturnAfterGesture = true;
+    this.checkProcedureReturnAfterGesture_ = true;
+  // } else if (!this.procedureReturnChangeTimeout) {
+  //   this.procedureReturnChangeTimeout = setTimeout(function() {
+  //     this.procedureReturnChangeTimeout = null;
+  //     this.processProcedureReturnsChanged();
+  //   }.bind(this));
+  // }
+  } else {
+    this.procedureReturnChangeTimeout_ = setTimeout(this.processProcedureReturnsChanged_.bind(this));
+  }
+};
+
+// Blockly.WorkspaceSvg.prototype.processProcedureReturnsChanged = function() {
+/**
+ * @private
+ */
+Blockly.WorkspaceSvg.prototype.processProcedureReturnsChanged_ = function() {
+  var initialTypes = this.initialProcedureReturnTypes_;
+  var finalTypes = Blockly.Procedures.getAllProcedureReturnTypes(this);
+
+  this.initialProcedureReturnTypes_ = null;
+  this.checkProcedureReturnAfterGesture_ = false;
+  this.procedureReturnChangeTimeout_ = null;
+
+  // !!! LOL? ???
+  //   // Don't fire events for each block, instead batch them all together.
+  //   // This is called after a gesture ends, or after a timeout (e.g. when
+  //   // a procedure mutator is opened or closed).
+  //   // This is necessary because the return type of a procedure call can
+  //   // change when a procedure mutator is opened or closed, and we don't
+  //   // want to fire events for each block in that case.
+  //   // We also don't want to fire events for each block when a procedure
+  //   // mutator is opened or closed because that would cause the toolbox
+  //   // to refresh multiple times, which is slow.
+  //   // Instead, we fire one event for all the blocks that changed.
+  //   // This is also called when a procedure mutator is opened or closed,
+  //   // because the return type of a procedure call can change when a
+  //   // procedure mutator is opened or closed.
+  //   // This is also called when a procedure definition is changed,
+  //   // because the return type of a procedure call can change when a
+  //   // procedure definition is changed.
+
+  // Update shape of loose blocks when return types change.
+  Blockly.Events.setGroup(true);
+  var topBlocks = this.getTopBlocks(false);
+  for (var i = 0; i < topBlocks.length; i++) {
+    var block = topBlocks[i];
+    // if (!block.getNextBlock() && block.type === Blockly.PROCEDURES_CALL_BLOCK_TYPE) {
+    if (block.type !== Blockly.PROCEDURES_CALL_BLOCK_TYPE) continue;
+
+    // !!! ???
+    // After a gesture, call is early enough, so that:
+    // There could still be insertion markers.
+    if (block.isInsertionMarker()) continue;
+
+    // Because this block is a top block:
+    // It will not have a parent by definition.
+    // If another block is connected below:
+    // It should be left unchanged (instead of unplugging).
+    if (block.getNextBlock()) continue;
+
+    var procCode = block.getProcCode();
+    // If the procedure does not exist or is new:
+    // Ignore it.
+    // (Fix procedure call type being lost when proccode changes.)
+    if (
+      !Object.prototype.hasOwnProperty.call(initialTypes, procCode) ||
+      !Object.prototype.hasOwnProperty.call(finalTypes, procCode)
+    ) continue;
+
+    // Allow custom boolean reporters.
+    // var actuallyReturns = Blockly.Procedures.procedureContainsReturn(procCode, this);
+
+    // if (actuallyReturns && block.getReturn() === Blockly.PROCEDURES_CALL_TYPE_STATEMENT) {
+    //   Blockly.Procedures.changeReturnType(block, Blockly.PROCEDURES_CALL_TYPE_REPORTER);
+    // } else if (!actuallyReturns && block.getReturn() !== Blockly.PROCEDURES_CALL_TYPE_STATEMENT) {
+    //   Blockly.Procedures.changeReturnType(block, Blockly.PROCEDURES_CALL_TYPE_STATEMENT);
+    // }
+    // var actuallyReturns = Blockly.Procedures.procedureContainsReturnType(procCode, this);
+    var actualReturnType = finalTypes[procCode];
+    
+    // if (actuallyReturns !== block.getReturn()) {
+    if (
+      block.getReturn() !== actualReturnType &&
+      // actuallyReturns !== block.getReturn()
+      // If a user is allowed to override call block shape:
+      // Only update the shape if:
+      // The definition's shape has actually changed.
+      (!Blockly.Procedures.USER_CAN_CHANGE_CALL_TYPE || initialTypes[procCode] !== actualReturnType)
+    ) {
+      // Blockly.Procedures.changeReturnType(block, actuallyReturns);
+      Blockly.Procedures.changeReturnType(block, actualReturnType);
+    }
+
+    // }
+  }
+  Blockly.Events.setGroup(false);
+
+  // Toolbox refresh can be slow, thus:
+  // Only perform toolbox refresh when needed.
+  var toolboxOutdated = false;
+  for (var procCode in finalTypes) {
+    // If a current procedure existed but its type has changed:
+    // The toolbox must be updated.
+    // If a new procedure was created:
+    // The toolbox is already updated elsewhere.
+    if (
+      Object.prototype.hasOwnProperty.call(initialTypes, procCode) &&
+      initialTypes[procCode] !== finalTypes[procCode]
+    ) {
+      toolboxOutdated = true;
+      break;
+    }
+  }
+  if (toolboxOutdated) {
+    this.refreshToolboxSelection_();
+  }
+};
+
+/**
+ * Does not refresh toolbox.
+ */
+Blockly.WorkspaceSvg.prototype.enableProcedureReturns = function() {
+  this.procedureReturnsEnabled = true;
+};
+
 /**
  * Resize and reposition all of the workspace chrome (toolbox,
  * trash, scrollbars etc.)
@@ -701,6 +866,7 @@ Blockly.WorkspaceSvg.prototype.resize = function() {
     this.scrollbar.resize();
   }
   this.updateScreenCalculations_();
+  this.queueIntersectionCheck();
 };
 
 /**
@@ -772,6 +938,7 @@ Blockly.WorkspaceSvg.prototype.translate = function(x, y) {
   if (this.blockDragSurface_) {
     this.blockDragSurface_.translateAndScaleGroup(x, y, this.scale);
   }
+  this.queueIntersectionCheck();
 };
 
 /**
@@ -986,7 +1153,7 @@ Blockly.WorkspaceSvg.prototype.reportValue = function(id, value) {
   var contentDiv = Blockly.DropDownDiv.getContentDiv();
   var valueReportBox = goog.dom.createElement('div');
   valueReportBox.setAttribute('class', 'valueReportBox');
-  valueReportBox.innerHTML = Blockly.scratchBlocksUtils.encodeEntities(value);
+  valueReportBox.textContent = value;
   contentDiv.appendChild(valueReportBox);
   Blockly.DropDownDiv.setColour(
       Blockly.Colours.valueReportBackground,
@@ -1805,6 +1972,7 @@ Blockly.WorkspaceSvg.prototype.setScale = function(newScale) {
     // No toolbox, resize flyout.
     this.flyout_.reflow();
   }
+  this.queueIntersectionCheck();
 };
 
 /**
@@ -2215,6 +2383,13 @@ Blockly.WorkspaceSvg.prototype.getGesture = function(e) {
  */
 Blockly.WorkspaceSvg.prototype.clearGesture = function() {
   this.currentGesture_ = null;
+
+  // if (this.checkProcedureReturnAfterGesture) {
+  if (this.checkProcedureReturnAfterGesture_) {
+    // this.checkProcedureReturnAfterGesture = false;
+    // this.processProcedureReturnsChanged();
+    this.processProcedureReturnsChanged_();
+  }
 };
 
 /**

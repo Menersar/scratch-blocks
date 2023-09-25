@@ -145,6 +145,11 @@ Blockly.Connection.prototype.connect_ = function(childConnection) {
   if (parentConnection == parentBlock.getFirstStatementConnection()) {
     isSurroundingC = true;
   }
+
+  if (Blockly.Events.isEnabled() && !childBlock.isInsertionMarker()) {
+    childBlock.workspace.procedureReturnsWillChange();
+  }
+
   // Disconnect any existing parent on the child connection.
   if (childConnection.isConnected()) {
     // Scratch-specific behaviour:
@@ -219,6 +224,17 @@ Blockly.Connection.prototype.connect_ = function(childConnection) {
   if (isSurroundingC && previousParentConnection) {
     previousParentConnection.connect(parentBlock.previousConnection);
   }
+
+  // !!! ???
+  // if (
+  //   Blockly.Events.isEnabled() &&
+  //   // Allow custom boolean reporters.
+  //   // !childBlock.isInsertionMarker() &&
+  //   // Blockly.Procedures.blockContainsReturn(childBlock)
+  //   !childBlock.isInsertionMarker()
+  // ) {
+  //   childBlock.workspace.procedureReturnsChanged();
+  // }
 
   var event;
   if (Blockly.Events.isEnabled()) {
@@ -584,10 +600,26 @@ Blockly.Connection.prototype.disconnect = function() {
  */
 Blockly.Connection.prototype.disconnectInternal_ = function(parentBlock,
     childBlock) {
+  if (Blockly.Events.isEnabled() && !childBlock.isInsertionMarker()) {
+    childBlock.workspace.procedureReturnsWillChange();
+  }
+
   var event;
   if (Blockly.Events.isEnabled()) {
     event = new Blockly.Events.BlockMove(childBlock);
   }
+
+  // !!! ???
+  // if (
+  //   Blockly.Events.isEnabled() &&
+  //   // Allow custom boolean reporters.
+  //   // !childBlock.isInsertionMarker() &&
+  //   // Blockly.Procedures.blockContainsReturn(childBlock)
+  //   !childBlock.isInsertionMarker()
+  // ) {
+  //   childBlock.workspace.procedureReturnsChanged();
+  // }
+
   var otherConnection = this.targetConnection;
   otherConnection.targetConnection = null;
   this.targetConnection = null;

@@ -22,9 +22,11 @@
  * @fileoverview English strings.
  * @author ascii@media.mit.edu (Andrew Sliwinski)
  *
+ * !!! SK !!!
  * After modifying this file, run `npm run translate` from the root directory
  * to regenerate `./msg/json/en.json`.
  * IMPORTANT:
+ * !!! Exact reason for that statement, etc.(?!)? ???
  * All message strings must use single quotes for the scripts to work properly
  */
 'use strict';
@@ -219,6 +221,13 @@ Blockly.Msg.OPERATORS_MATHOP_10EXP = '10 ^';
 
 // Procedures blocks
 Blockly.Msg.PROCEDURES_DEFINITION = 'define %1';
+
+// Sidekick procedures blocks.
+Blockly.Msg.PROCEDURES_RETURN = 'return %1';
+Blockly.Msg.PROCEDURES_TO_REPORTER = 'Change To Reporter';
+Blockly.Msg.PROCEDURES_TO_STATEMENT = 'Change To Stacked Block';
+// Button explaining how to use return.
+Blockly.Msg.PROCEDURES_DOCS = 'How to use return';
 
 // Sensing blocks
 Blockly.Msg.SENSING_TOUCHINGOBJECT = 'touching %1?';

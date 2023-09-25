@@ -348,6 +348,11 @@ Blockly.Css.CONTENT = [
     'max-width: 300px;',
     'max-height: 200px;',
     'overflow: auto;',
+    'white-space: pre-wrap;',
+    'user-select: text;',
+    '-moz-user-select: text;',
+    '-webkit-user-select: text;',
+    '-ms-user-select: text;',
     'word-wrap: break-word;',
     'text-align: center;',
     'font-family: "Helvetica Neue", Helvetica, sans-serif;',
@@ -663,17 +668,9 @@ Blockly.Css.CONTENT = [
     'fill: #fef49c;',
   '}',
 
-  '.scratchCommentTarget {',
-    'fill: transparent;',
-  '}',
-
   '.scratchWorkspaceCommentBorder {',
     'stroke: #bcA903;',
     'stroke-width: 1px;',
-  '}',
-
-  '.scratchCommentTargetFocused {',
-    'fill: none;',
   '}',
 
   '.scratchCommentTopBar {',
@@ -688,12 +685,11 @@ Blockly.Css.CONTENT = [
   '}',
 
   '.scratchCommentTextarea {',
-    'background-color: #fef49c;',
+    'background-color: transparent;',
     'border: 0;',
     'outline: 0;',
     'padding: 0;',
     'resize: none;',
-    'overflow: hidden;',
   '}',
 
   '.scratchCommentTextarea::placeholder {',

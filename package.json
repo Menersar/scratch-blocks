@@ -7,14 +7,14 @@
   "homepage": "https://github.com/LLK/scratch-blocks#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/LLK/scratch-blocks.git",
-    "sha": "$(git log -n1 --pretty=format:%H)"
+    "url": "https://github.com/LLK/scratch-blocks.git"
   },
   "main": "./dist/vertical.js",
   "browser": "./shim/vertical.js",
   "scripts": {
-    "deploy": "rimraf gh-pages/closure-library/scripts/ci/CloseAdobeDialog.exe && gh-pages -t -d gh-pages -m \"Build for $(git log --pretty=format:%H -n1) [skip ci]\"",
-    "prepublishOnly": "python build.py && webpack",
+    "deploy": "rimraf gh-pages/closure-library/scripts/ci/CloseAdobeDialog.exe && gh-pages -t -d gh-pages -m \"Build for $(git log --pretty=format:%H -n1)\"",
+    "deploy2": "rimraf gh-pages/closure-library/scripts/ci/CloseAdobeDialog.exe && gh-pages -t -d gh-pages -m \"Build for $(git log --pretty=format:%H -n1) [skip ci]\"",
+    "prepublish": "python build.py && webpack",
     "test:unit": "node tests/jsunit/test_runner.js",
     "test:lint": "eslint .",
     "test:messages": "npm run translate && node i18n/test_scratch_msgs.js",
@@ -29,7 +29,7 @@
     "exports-loader": "0.7.0",
     "google-closure-library": "20190301.0.0",
     "imports-loader": "0.8.0",
-    "scratch-l10n": "3.15.20230709032152"
+    "scratch-l10n": "3.15.20221022032111"
   },
   "devDependencies": {
     "async": "2.6.4",
@@ -40,10 +40,10 @@
     "gh-pages": "0.12.0",
     "glob": "7.2.3",
     "google-closure-compiler": "20180402.0.0",
-    "graceful-fs": "4.2.11",
+    "graceful-fs": "4.2.10",
     "json": "9.0.6",
     "rimraf": "2.7.1",
-    "selenium-webdriver": "4.10.0",
+    "selenium-webdriver": "4.5.0",
     "transifex": "1.6.6",
     "uglifyjs-webpack-plugin": "1.3.0",
     "webpack": "4.46.0",

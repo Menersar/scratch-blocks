@@ -236,7 +236,9 @@ Blockly.ScratchBlockComment.prototype.createEditor_ = function() {
       this.textareaFocus_, true, true); // noCapture and do not prevent default
   // Don't zoom with mousewheel.
   Blockly.bindEventWithChecks_(textarea, 'wheel', this, function(e) {
-    e.stopPropagation();
+    if (!e.ctrlKey && textarea.clientHeight !== textarea.scrollHeight) {
+      e.stopPropagation();
+    }
   });
   Blockly.bindEventWithChecks_(textarea, 'change', this, function(_e) {
     if (this.text_ != textarea.value) {
@@ -261,7 +263,6 @@ Blockly.ScratchBlockComment.prototype.createEditor_ = function() {
  * @private
  */
 Blockly.ScratchBlockComment.prototype.textareaFocus_ = function(e) {
-  Blockly.ScratchBlockComment.superClass_.textareaFocus_.call(this, e);
   // Stop event from propagating to the workspace to make sure preventDefault _is not called_.
   e.stopPropagation();
 };
@@ -317,9 +318,7 @@ Blockly.ScratchBlockComment.prototype.autoPosition_ = function() {
     // blocks below it in the stack that are wider than this block
     // Overhang is the difference between this blocks trailing edge and
     // the largest block below (zero if this block is the widest)
-    var thisBlockWidth = Math.floor(this.block_.svgPath_.getBBox().width);
-    var fullStackWidth = Math.floor(this.block_.getHeightWidth().width);
-    var overhang = fullStackWidth - thisBlockWidth;
+    var overhang = 0;
     var offset = 8 * Blockly.BlockSvg.GRID_UNIT;
     this.x_ = this.block_.RTL ?
         this.iconXY_.x - this.width_ - overhang - offset :

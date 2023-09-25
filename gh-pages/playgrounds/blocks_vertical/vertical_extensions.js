@@ -33,28 +33,32 @@ goog.require('Blockly.Colours');
 goog.require('Blockly.constants');
 
 
+// !!! ???
 /**
  * Helper function that generates an extension based on a category name.
- * The generated function will set primary, secondary, tertiary, and quaternary
- * colours based on the category name.
+ * The generated function will set primary, secondary, and tertiary colours based
+ * on the category name.
  * @param {String} category The name of the category to set colours for.
  * @return {function} An extension function that sets colours based on the given
  *     category.
  */
 Blockly.ScratchBlocks.VerticalExtensions.colourHelper = function(category) {
   var colours = Blockly.Colours[category];
-  if (!(colours && colours.primary && colours.secondary && colours.tertiary &&
-    colours.quaternary)) {
+  // if (!(colours && colours.primary && colours.secondary && colours.tertiary &&
+  //   colours.quaternary)) {
+  if (!(colours && colours.primary && colours.secondary && colours.tertiary)) {
     throw new Error('Could not find colours for category "' + category + '"');
   }
   /**
-   * Set the primary, secondary, tertiary, and quaternary colours on this block for
+   * Set the primary, secondary, and tertiary colours on this block for
    * the given category.
    * @this {Blockly.Block}
    */
   return function() {
+    // this.setColourFromRawValues_(colours.primary, colours.secondary,
+    //     colours.tertiary, colours.quaternary);
     this.setColourFromRawValues_(colours.primary, colours.secondary,
-        colours.tertiary, colours.quaternary);
+        colours.tertiary);
   };
 };
 
@@ -62,9 +66,11 @@ Blockly.ScratchBlocks.VerticalExtensions.colourHelper = function(category) {
  * Extension to set the colours of a text field, which are all the same.
  */
 Blockly.ScratchBlocks.VerticalExtensions.COLOUR_TEXTFIELD = function() {
+  // this.setColourFromRawValues_(Blockly.Colours.textField,
+  //     Blockly.Colours.textField, Blockly.Colours.textField,
+  //     Blockly.Colours.textField);
   this.setColourFromRawValues_(Blockly.Colours.textField,
-      Blockly.Colours.textField, Blockly.Colours.textField,
-      Blockly.Colours.textField);
+      Blockly.Colours.textField, Blockly.Colours.textField);
 };
 
 /**
@@ -202,6 +208,7 @@ Blockly.ScratchBlocks.VerticalExtensions.PROCEDURE_DEF_CONTEXTMENU = {
  * @readonly
  */
 Blockly.ScratchBlocks.VerticalExtensions.PROCEDURE_CALL_CONTEXTMENU = {
+  // !!! 'TODO'? ???
   /**
    * Add the "edit" option to the context menu.
    * @todo Add "go to definition" option once implemented.
@@ -210,6 +217,14 @@ Blockly.ScratchBlocks.VerticalExtensions.PROCEDURE_CALL_CONTEXTMENU = {
    */
   customContextMenu: function(menuOptions) {
     menuOptions.push(Blockly.Procedures.makeEditOption(this));
+    // if (!this.isInFlyout) {
+    if (
+      !this.isInFlyout &&
+      Blockly.Procedures.USER_CAN_CHANGE_CALL_TYPE &&
+      this.workspace.procedureReturnsEnabled
+    ) {
+      menuOptions.push(Blockly.Procedures.makeChangeTypeOption(this));
+    }
   }
 };
 

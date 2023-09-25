@@ -1,7 +1,7 @@
 {
 	"@metadata": {
 		"author": "Ellen Spertus <ellen.spertus@gmail.com>",
-		"lastupdated": "2023-07-11 15:54:19.609085",
+		"lastupdated": "2023-09-25 04:18:10.333038",
 		"locale": "en",
 		"messagedocumentation" : "qqq"
 	},
@@ -178,6 +178,10 @@
 	"OPERATORS_MATHOP_EEXP": "e ^",
 	"OPERATORS_MATHOP_10EXP": "10 ^",
 	"PROCEDURES_DEFINITION": "define %1",
+	"PROCEDURES_RETURN": "return %1",
+	"PROCEDURES_TO_REPORTER": "Change To Reporter",
+	"PROCEDURES_TO_STATEMENT": "Change To Stacked Block",
+	"PROCEDURES_DOCS": "How to use return",
 	"SENSING_TOUCHINGOBJECT": "touching %1?",
 	"SENSING_TOUCHINGOBJECT_POINTER": "mouse-pointer",
 	"SENSING_TOUCHINGOBJECT_EDGE": "edge",

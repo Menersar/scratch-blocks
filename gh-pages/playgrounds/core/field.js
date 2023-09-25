@@ -744,11 +744,14 @@ Blockly.Field.prototype.onMouseDown_ = function(e) {
   if (!this.sourceBlock_ || !this.sourceBlock_.workspace) {
     return;
   }
+  if (this.sourceBlock_.workspace.isDragging()) {
+    return;
+  }
   var gesture = this.sourceBlock_.workspace.getGesture(e);
   if (gesture) {
     gesture.setStartField(this);
   }
-  this.useTouchInteraction_ = Blockly.Touch.getTouchIdentifierFromEvent(event) !== 'mouse';
+  this.useTouchInteraction_ = Blockly.Touch.getTouchIdentifierFromEvent(e) !== 'mouse';
 };
 
 /**
