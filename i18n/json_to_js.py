@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 # Converts .json files into .js files for use within Blockly apps.
 #
